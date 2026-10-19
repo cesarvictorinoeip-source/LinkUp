@@ -1,0 +1,31 @@
+﻿@model LinkUp.Core.Application.ViewModels.User.SaveUserViewModel
+@{
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<div class="container mt-5">
+    <div class="card col-md-6 mx-auto shadow border-warning">
+        <div class="card-header bg-warning"><h4>Editar @Model.UserName</h4></div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ProfileImage" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Nombre</label>
+                    <input asp-for="Name" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cambiar Foto (Opcional)</label>
+                    <input asp-for="ProfileImageFile" type="file" class="form-control" />
+                </div>
+                <div class="mb-3 bg-light p-2 border rounded">
+                    <small class="text-muted">Nueva contraseña (dejar en blanco para mantener la actual)</small>
+                    <input asp-for="Password" type="password" class="form-control mt-1" />
+                </div>
+                <button type="submit" class="btn btn-warning w-100">Guardar Cambios</button>
+                <a asp-action="Index" class="btn btn-link w-100">Volver</a>
+            </form>
+        </div>
+    </div>
+</div>

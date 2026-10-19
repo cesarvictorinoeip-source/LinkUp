@@ -1,0 +1,124 @@
+﻿@using LinkUp.Core.Application.Dtos.Battleship.Game
+@using LinkUp.Core.Application.Dtos.Battleship.Playershot
+@model GameDto
+@{
+    ViewData["Title"] = "Jugar Battleship";
+    var shots = ViewBag.Shots as List<PlayerShotDto>;
+    var currentUserId = ViewBag.CurrentUserId as string;
+    var isMyTurn = (bool)ViewBag.IsMyTurn;
+    var opponentId = Model.Player1Id == currentUserId ? Model.Player2Id : Model.Player1Id;
+    var opponentName = Model.Player1Id == currentUserId ? Model.Player2Name : Model.Player1Name;
+}
+
+<div class="container mt-4">
+    <h3 class="mb-2">Battleship vs <strong>@opponentName</strong></h3>
+
+    @if (Model.IsFinished)
+    {
+        <div class="alert @(Model.WinnerId == currentUserId ? "alert-success" : "alert-danger")">
+            @(Model.WinnerId == currentUserId ? "¡Ganaste la partida! 🎉" : "Perdiste la partida. 😞")
+        </div>
+        <a asp-action="Index" class="btn btn-primary">Volver al inicio</a>
+    }
+    else
+    {
+        <div class="alert @(isMyTurn ? "alert-success" : "alert-warning")">
+            @(isMyTurn ? "¡Es tu turno! Haz clic en el tablero del oponente para atacar." : "Esperando el turno del oponente...")
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Tablero del oponente</h5>
+                <table class="table table-bordered text-center" style="width:420px">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @for (int c = 0; c < 10; c++)
+                            {
+                                <th>@c</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int r = 0; r < 10; r++)
+                        {
+                            <tr>
+                                <th>@r</th>
+                                @for (int c = 0; c < 10; c++)
+                                {
+                                    var shot = shots?.FirstOrDefault(s => s.PlayerId == currentUserId && s.Row == r && s.Column == c);
+                                    var bg = shot == null ? "#e9f5ff" : (shot.IsHit ? "#dc3545" : "#adb5bd");
+                                    var symbol = shot == null ? "" : (shot.IsHit ? "💥" : "•");
+                                    var canClick = isMyTurn && shot == null;
+                                    <td style="width:40px;height:40px;background:@bg;cursor:@(canClick ? "pointer" : "default")"
+                                        onclick="@(canClick ? $"attack({r},{c})" : "")">
+                                        @symbol
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <h5>Mi tablero</h5>
+                <table class="table table-bordered text-center" style="width:420px">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            @for (int c = 0; c < 10; c++)
+                            {
+                                <th>@c</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int r = 0; r < 10; r++)
+                        {
+                            <tr>
+                                <th>@r</th>
+                                @for (int c = 0; c < 10; c++)
+                                {
+                                    var hit = shots?.FirstOrDefault(s => s.PlayerId == opponentId && s.Row == r && s.Column == c);
+                                    var bg = hit == null ? "#e9f5ff" : (hit.IsHit ? "#dc3545" : "#adb5bd");
+                                    var symbol = hit == null ? "" : (hit.IsHit ? "💥" : "•");
+                                    <td style="width:40px;height:40px;background:@bg">@symbol</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <form id="attackForm" asp-action="Attack" method="post">
+            <input type="hidden" name="gameId" value="@Model.Id" />
+            <input type="hidden" name="row" id="attackRow" />
+            <input type="hidden" name="column" id="attackCol" />
+        </form>
+
+        <form asp-action="Surrender" method="post" class="mt-3">
+            <input type="hidden" name="gameId" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('¿Seguro que quieres rendirte?')">
+                Rendirse
+            </button>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function attack(row, col) {
+            document.getElementById('attackRow').value = row;
+            document.getElementById('attackCol').value = col;
+            document.getElementById('attackForm').submit();
+        }
+
+        @if (!isMyTurn && !Model.IsFinished)
+        {
+            <text>setTimeout(() => location.reload(), 5000);</text>
+        }
+    </script>
+}

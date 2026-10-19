@@ -1,0 +1,58 @@
+﻿@using LinkUp.Core.Application.Dtos.Battleship.Game
+@using LinkUp.Core.Application.Dtos.Battleship.Playershot
+@model GameDto
+@{
+    ViewData["Title"] = "Detalle de Partida";
+    var shots = ViewBag.Shots as List<PlayerShotDto>;
+}
+
+<div class="container mt-4">
+    <h3 class="mb-4">Detalle de Partida</h3>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <p><strong>Jugador 1:</strong> @Model.Player1Name</p>
+            <p><strong>Jugador 2:</strong> @Model.Player2Name</p>
+            <p><strong>Ganador:</strong> @(Model.WinnerId == Model.Player1Id ? Model.Player1Name : Model.Player2Name)</p>
+            <p><strong>Inicio:</strong> @Model.StartedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><strong>Fin:</strong> @Model.FinishedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+    </div>
+
+    <h5>Disparos realizados</h5>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Jugador</th>
+                <th>Fila</th>
+                <th>Columna</th>
+                <th>Resultado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (shots != null)
+            {
+                @foreach (var s in shots)
+                {
+                    <tr>
+                        <td>@(s.PlayerId == Model.Player1Id ? Model.Player1Name : Model.Player2Name)</td>
+                        <td>@s.Row</td>
+                        <td>@s.Column</td>
+                        <td>
+                            @if (s.IsHit)
+                            {
+                                <span class="badge bg-danger">Impacto 💥</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Agua •</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <a asp-action="Index" class="btn btn-secondary mt-2">Volver</a>
+</div>

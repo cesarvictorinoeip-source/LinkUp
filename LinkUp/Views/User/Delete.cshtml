@@ -1,0 +1,16 @@
+﻿@model LinkUp.Core.Application.ViewModels.User.SaveUserViewModel
+
+<div class="container mt-5">
+    <div class="alert alert-danger shadow col-md-6 mx-auto">
+        <h3>¿Eliminar usuario?</h3>
+        <p>Estás a punto de borrar a: <strong>@Model.UserName</strong></p>
+
+        @* IMPORTANTE: asp-action debe ser "DeletePost" *@
+        <form asp-controller="User" asp-action="DeletePost" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

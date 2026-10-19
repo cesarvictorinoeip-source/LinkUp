@@ -1,0 +1,168 @@
+﻿@using LinkUp.Core.Application.Dtos.Battleship.Game
+@model GameDto
+@{
+    ViewData["Title"] = "Colocar Barcos";
+    var gameId = ViewBag.GameId;
+    var userId = ViewBag.UserId;
+}
+
+<div class="container mt-4">
+    <h3 class="mb-4">Colocar Barcos</h3>
+    <p class="text-muted">Haz clic en una celda para colocar tu barco. Puedes rotar la orientación.</p>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h5>Tu tablero</h5>
+            <table id="myBoard" class="table table-bordered text-center" style="width:420px">
+                <thead>
+                    <tr>
+                        <th></th>
+                        @for (int c = 0; c < 10; c++)
+                        {
+                            <th>@c</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int r = 0; r < 10; r++)
+                    {
+                        <tr>
+                            <th>@r</th>
+                            @for (int c = 0; c < 10; c++)
+                            {
+                                <td id="cell-@r-@c"
+                                    style="width:40px;height:40px;cursor:pointer;background:#e9f5ff"
+                                    onclick="placeShip(@r, @c)">
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">Barcos disponibles</div>
+                <div class="card-body">
+                    <ul class="list-group" id="shipList">
+                        <li class="list-group-item d-flex justify-content-between" data-type="Portaaviones" data-size="5">
+                            Portaaviones <span class="badge bg-primary">5</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" data-type="Acorazado" data-size="4">
+                            Acorazado <span class="badge bg-primary">4</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" data-type="Crucero" data-size="3">
+                            Crucero <span class="badge bg-primary">3</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" data-type="Submarino" data-size="3">
+                            Submarino <span class="badge bg-primary">3</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between" data-type="Destructor" data-size="2">
+                            Destructor <span class="badge bg-primary">2</span>
+                        </li>
+                    </ul>
+                    <button class="btn btn-secondary mt-3 w-100" onclick="toggleOrientation()">
+                        Rotar: <span id="orientationLabel">Horizontal</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="selectedShipInfo" class="alert alert-info" style="display:none">
+                Barco seleccionado: <strong id="selectedShipName"></strong>
+            </div>
+
+            <form id="shipsForm" asp-action="PlaceShips" method="post">
+                <input type="hidden" name="gameId" value="@gameId" />
+                <div id="shipsInput"></div>
+                <button type="submit" class="btn btn-success w-100 mt-2" id="btnConfirm" disabled>
+                    Confirmar y continuar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let isVertical = false;
+        let selectedShip = null;
+        let placedShips = [];
+        const shipItems = document.querySelectorAll('#shipList .list-group-item');
+
+        shipItems.forEach(item => {
+            item.style.cursor = 'pointer';
+            item.addEventListener('click', () => {
+                shipItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                selectedShip = {
+                    type: item.dataset.type,
+                    size: parseInt(item.dataset.size)
+                };
+                document.getElementById('selectedShipName').textContent = item.dataset.type;
+                document.getElementById('selectedShipInfo').style.display = 'block';
+            });
+        });
+
+        function toggleOrientation() {
+            isVertical = !isVertical;
+            document.getElementById('orientationLabel').textContent = isVertical ? 'Vertical' : 'Horizontal';
+        }
+
+        function placeShip(row, col) {
+            if (!selectedShip) { alert('Selecciona un barco primero.'); return; }
+
+            // Verificar si ya fue colocado
+            if (placedShips.find(s => s.type === selectedShip.type)) {
+                alert('Este barco ya fue colocado.');
+                return;
+            }
+
+            // Verificar que cabe en el tablero
+            if (!isVertical && col + selectedShip.size > 10) { alert('No cabe horizontalmente.'); return; }
+            if (isVertical && row + selectedShip.size > 10) { alert('No cabe verticalmente.'); return; }
+
+            // Pintar celdas
+            for (let i = 0; i < selectedShip.size; i++) {
+                const r = isVertical ? row + i : row;
+                const c = isVertical ? col : col + i;
+                const cell = document.getElementById(`cell-${r}-${c}`);
+                if (cell) cell.style.background = '#1a73e8';
+            }
+
+            // Guardar barco
+            placedShips.push({ type: selectedShip.type, size: selectedShip.size, startX: row, startY: col, isVertical });
+
+            // Marcar como colocado en la lista
+            shipItems.forEach(item => {
+                if (item.dataset.type === selectedShip.type) {
+                    item.classList.remove('active');
+                    item.classList.add('text-decoration-line-through', 'text-muted');
+                }
+            });
+
+            selectedShip = null;
+            document.getElementById('selectedShipInfo').style.display = 'none';
+
+            // Habilitar botón si todos colocados
+            if (placedShips.length === 5) {
+                buildFormInputs();
+                document.getElementById('btnConfirm').removeAttribute('disabled');
+            }
+        }
+
+        function buildFormInputs() {
+            const container = document.getElementById('shipsInput');
+            container.innerHTML = '';
+            placedShips.forEach((s, i) => {
+                container.innerHTML += `
+                    <input type="hidden" name="ships[${i}].Type" value="${s.type}" />
+                    <input type="hidden" name="ships[${i}].Size" value="${s.size}" />
+                    <input type="hidden" name="ships[${i}].StartX" value="${s.startX}" />
+                    <input type="hidden" name="ships[${i}].StartY" value="${s.startY}" />
+                    <input type="hidden" name="ships[${i}].IsVertical" value="${s.isVertical}" />
+                `;
+            });
+        }
+    </script>
+}

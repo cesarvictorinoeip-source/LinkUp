@@ -1,0 +1,39 @@
+﻿@using LinkUp.Core.Application.Dtos.Battleship.Post
+@model List<PostDto>
+@{
+    ViewData["Title"] = "Publicaciones de @ViewBag.FriendName";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-secondary me-3">Volver atrás</a>
+        <h4 class="mb-0">Publicaciones de <strong>@ViewBag.FriendName</strong></h4>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">Este amigo no tiene publicaciones aún.</div>
+    }
+    else
+    {
+        @foreach (var post in Model)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted">@post.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                    <p class="mt-2">@post.Content</p>
+                    @if (!string.IsNullOrEmpty(post.ImagePath))
+                    {
+                        <img src="@post.ImagePath" class="img-fluid rounded" />
+                    }
+                    @if (!string.IsNullOrEmpty(post.YoutubeUrl))
+                    {
+                        <div class="ratio ratio-16x9 mt-2">
+                            <iframe src="@post.YoutubeUrl" allowfullscreen></iframe>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>

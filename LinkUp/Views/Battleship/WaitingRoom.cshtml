@@ -1,0 +1,46 @@
+﻿@using LinkUp.Core.Application.Dtos.Battleship.Game
+@model GameDto
+@{
+    ViewData["Title"] = "Sala de Espera";
+    var bothReady = (bool)ViewBag.BothReady;
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm mx-auto" style="max-width:500px">
+        <div class="card-header bg-warning text-dark text-center">
+            <h4 class="mb-0">Sala de Espera</h4>
+        </div>
+        <div class="card-body text-center">
+            @if (bothReady)
+            {
+                <div class="alert alert-success">
+                    ¡Ambos jugadores están listos! La partida puede comenzar.
+                </div>
+                <a asp-action="Play" asp-route-gameId="@Model.Id" class="btn btn-success btn-lg w-100">
+                    ¡Jugar ahora!
+                </a>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Esperando a que el oponente coloque sus barcos...
+                </div>
+                <p class="text-muted">La página se actualizará automáticamente.</p>
+                <a asp-action="Index" class="btn btn-outline-secondary mt-2">Volver al inicio</a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Refrescar cada 5 segundos si no están listos
+        @if (!bothReady)
+        {
+            <text>
+                setTimeout(() => location.reload(), 5000);
+            </text>
+        }
+    </script>
+}

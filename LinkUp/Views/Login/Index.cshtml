@@ -1,0 +1,71 @@
+﻿@model LinkUp.Core.Application.ViewModels.User.LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    // Usamos el layout principal para mantener la coherencia
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h5 class="mb-0"><i class="bi bi-person-circle"></i> Acceso al Sistema</h5>
+                </div>
+                <div class="card-body p-4">
+
+                    @if (!string.IsNullOrEmpty(Model.Error))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> @Model.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @Html.ValidationSummary(false, "", new { @class = "text-danger small mb-3" })
+
+                    <form asp-controller="Login" asp-action="Index" method="POST">
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label fw-bold">Nombre de Usuario:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input class="form-control" asp-for="UserName" placeholder="Ingresa tu usuario" />
+                            </div>
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Password" class="form-label fw-bold">Contraseña:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" asp-for="Password" placeholder="********" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Entrar
+                            </button>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <a asp-controller="Login" asp-action="ForgotPassword" class="text-decoration-none small d-block mb-2">
+                                <i class="bi bi-question-circle"></i> ¿Olvidaste tu contraseña?
+                            </a>
+                            <p class="mb-0 small">
+                                ¿No tienes cuenta?
+                                <a asp-controller="Login" asp-action="Register" class="fw-bold text-decoration-none">Regístrate aquí</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <small class="text-muted">&copy; 2026 - LinkUp</small>
+            </div>
+        </div>
+    </div>
+</div>
